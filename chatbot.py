@@ -41,7 +41,7 @@ product_list = '''
 
 # --- 챗봇의 System Message 설정 --------------------------------------------------
 SYSTEM_MESSAGE = f'''
-당신은 온라인 패션 상점 Trendy Fashion 의 AI 어시스턴트인 ShopBot 입니다.
+당신은 온라인 패션 상점 Trendy Fashion의 AI 어시스턴트인 ShopBot입니다.
 
 당신의 역할은 고객을 응대하고, 고객이 원하는 제품을 찾도록 재고 목록을 참고하여 정보를 제공하며, 구매 과정을 안내하는 것입니다.
 
@@ -53,7 +53,7 @@ SYSTEM_MESSAGE = f'''
 
 ```{product_list}```
 
-**환영 인사는 처음 한번만 합니다. 이미 고객에게 인사 메시지를 보여준 상태이므로, 고객이 '안녕하세요' 등으로 인사를 하더라도 똑같이 인사를 하지 말고, 바로 찾고 있는 제품이 있는지 물어보세요.**
+**환영 인사는 처음 한 번만 합니다. 이미 고객에게 인사 메시지를 보여준 상태이므로, 고객이 '안녕하세요' 등으로 인사를 하더라도 똑같이 인사를 하지 말고, 바로 찾고 있는 제품이 있는지 물어보세요.**
 
 고객의 메시지에는 항상 친절하게 답변해야 합니다.
 '''
@@ -82,27 +82,15 @@ context = [
 st.title('🛍️ Trendy Fashion 🛍️')    # 웹 애플리케이션의 제목을 설정한다.
 st.caption('🤖 AI 쇼핑 어시스턴트입니다.')       # 설명 문구(부제목)를 추가한다.
 
-# 챗봇이 이미 인사를 했는지 여부를 추적한다.
-if 'greeted' not in st.session_state:
-    st.session_state['greeted'] = False
-
-# AI 챗봇이 처음 인사말을 한다.
-if not st.session_state['greeted']:
-    st.chat_message(name='ai').write(GREETINGS)
-    st.session_state['greeted'] = True
-
 # 세션 상태에 'messages' 키가 없으면 빈 리스트로 초기화한다.
 if 'messages' not in st.session_state:  
     st.session_state['messages'] = []
+    # 인사 메시지를 세션 상태에 추가한다.
+    st.session_state['messages'].append({'role': 'assistant', 'content': GREETINGS})
 
 # 대화 기록을 화면에 출력한다.
 for msg in st.session_state.messages:
     st.chat_message(msg['role']).write(msg['content'])
-
-# 사용자 인사말 확인 함수
-def is_greeting(message):
-    greetings = ['hello', 'hi', 'good morning', 'good afternoon', 'hey', '안녕하세요', '안녕', '안뇽', '하이']
-    return any(greeting in message.lower() for greeting in greetings)
 
 # 사용자 입력 처리 및 GPT 응답 생성
 if prompt := st.chat_input():
@@ -110,30 +98,16 @@ if prompt := st.chat_input():
     st.session_state['messages'].append({'role': 'user', 'content': prompt})
     st.chat_message('user').write(prompt)
 
-    # 사용자 입력이 인사말인지 확인한다.
-    if is_greeting(prompt):
-        if not st.session_state['greeted']:
-            response = client.chat.completions.create(
-                model='gemma2-9b-it',
-                messages=context + st.session_state['messages']
-            )
-            msg = response.choices[0].message.content
-            st.session_state['messages'].append({'role': 'assistant', 'content': msg})
-            st.chat_message('assistant').write(msg)
-            st.session_state['greeted'] = True
-        else:
-            msg = "무엇을 도와드릴까요?"
-            st.session_state['messages'].append({'role': 'assistant', 'content': msg})
-            st.chat_message('assistant').write(msg)
-    else:
-        # 일반적인 처리
-        response = client.chat.completions.create(
-            model='gemma2-9b-it',
-            messages=context + st.session_state['messages']
-        )
-        msg = response.choices[0].message.content
-        st.session_state['messages'].append({'role': 'assistant', 'content': msg})
-        st.chat_message('assistant').write(msg)
+    # GPT 모델을 사용하여 응답 생성 (context를 메시지에 추가하여 사용)
+    response = client.chat.completions.create(
+        model='gemma2-9b-it',
+        messages=context + st.session_state['messages']
+    )
+    
+    # 응답 메시지를 대화 기록에 추가
+    msg = response.choices[0].message.content
+    st.session_state['messages'].append({'role': 'assistant', 'content': msg})
+    st.chat_message('assistant').write(msg)
 
     # Comet LLM 로그 저장
     comet_llm.log_prompt(
