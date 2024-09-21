@@ -82,6 +82,10 @@ context = [
 st.title('🛍️ Trendy Fashion 🛍️')    # 웹 애플리케이션의 제목을 설정한다.
 st.caption('🤖 AI 쇼핑 어시스턴트입니다.')       # 설명 문구(부제목)를 추가한다.
 
+# 세션 상태에 'greeted' 키가 없으면 초기화한다.
+if 'greeted' not in st.session_state:
+    st.session_state['greeted'] = False
+
 # 세션 상태에 'messages' 키가 없으면 빈 리스트로 초기화한다.
 if 'messages' not in st.session_state:
     st.session_state['messages'] = []
