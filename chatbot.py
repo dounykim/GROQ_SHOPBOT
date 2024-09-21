@@ -83,7 +83,7 @@ st.title('🛍️ Trendy Fashion 🛍️')    # 웹 애플리케이션의 제목
 st.caption('🤖 AI 쇼핑 어시스턴트입니다.')       # 설명 문구(부제목)를 추가한다.
 
 # 세션 상태에 'messages' 키가 없으면 빈 리스트로 초기화한다.
-if 'messages' not in st.session_state:  
+if 'messages' not in st.session_state:
     st.session_state['messages'] = []
     # 인사 메시지를 세션 상태에 추가한다.
     st.session_state['messages'].append({'role': 'assistant', 'content': GREETINGS})
@@ -92,22 +92,41 @@ if 'messages' not in st.session_state:
 for msg in st.session_state.messages:
     st.chat_message(msg['role']).write(msg['content'])
 
+# 사용자 인사말 확인 함수
+def is_greeting(message):
+    greetings = ['hello', 'hi', 'good morning', 'good afternoon', 'hey', '안녕하세요', '안녕', '안뇽', '하이']
+    return any(greeting in message.lower() for greeting in greetings)
+
 # 사용자 입력 처리 및 GPT 응답 생성
 if prompt := st.chat_input():
     # 사용자 입력을 대화 기록에 추가
     st.session_state['messages'].append({'role': 'user', 'content': prompt})
     st.chat_message('user').write(prompt)
 
-    # GPT 모델을 사용하여 응답 생성 (context를 메시지에 추가하여 사용)
-    response = client.chat.completions.create(
-        model='gemma2-9b-it',
-        messages=context + st.session_state['messages']
-    )
-    
-    # 응답 메시지를 대화 기록에 추가
-    msg = response.choices[0].message.content
-    st.session_state['messages'].append({'role': 'assistant', 'content': msg})
-    st.chat_message('assistant').write(msg)
+    # 사용자 입력이 인사말인지 확인한다.
+    if is_greeting(prompt):
+        if not st.session_state['greeted']:
+            response = client.chat.completions.create(
+                model='gemma2-9b-it',
+                messages=context + st.session_state['messages']
+            )
+            msg = response.choices[0].message.content
+            st.session_state['messages'].append({'role': 'assistant', 'content': msg})
+            st.chat_message('assistant').write(msg)
+            st.session_state['greeted'] = True
+        else:
+            msg = "무엇을 도와드릴까요?"
+            st.session_state['messages'].append({'role': 'assistant', 'content': msg})
+            st.chat_message('assistant').write(msg)
+    else:
+        # 일반적인 처리
+        response = client.chat.completions.create(
+            model='gemma2-9b-it',
+            messages=context + st.session_state['messages']
+        )
+        msg = response.choices[0].message.content
+        st.session_state['messages'].append({'role': 'assistant', 'content': msg})
+        st.chat_message('assistant').write(msg)
 
     # Comet LLM 로그 저장
     comet_llm.log_prompt(
