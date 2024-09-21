@@ -91,6 +91,8 @@ if 'messages' not in st.session_state:
     st.session_state['messages'] = []
     # 인사 메시지를 세션 상태에 추가한다.
     st.session_state['messages'].append({'role': 'assistant', 'content': GREETINGS})
+    # greeted 상태를 True로 설정한다.
+    st.session_state['greeted'] = True
 
 # 대화 기록을 화면에 출력한다.
 for msg in st.session_state.messages:
