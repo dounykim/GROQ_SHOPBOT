@@ -3,8 +3,8 @@ import comet_llm
 from groq import Groq
 
 # Comet API 키를 설정한다. st.secrets를 통해 안전하게 API 키를 불러온다.
-COMET_API_KEY = st.secrets['COMET_API_KEY'] # 또는 st.secrets['COMET_API_KEY'] 대신 직접 입력
-GROQ_API_KEY = st.secrets['GROQ_API_KEY'] # 또는 st.secrets['GROQ_API_KEY'] 대신 직접 입력
+COMET_API_KEY = st.secrets['COMET_API_KEY'] 
+GROQ_API_KEY = st.secrets['GROQ_API_KEY'] 
 
 # Groq Client 설정
 client = Groq(api_key=GROQ_API_KEY)
@@ -122,8 +122,9 @@ if prompt := st.chat_input():
             st.chat_message('assistant').write(msg)
             st.session_state['greeted'] = True
         else:
-            st.session_state['messages'].append({'role': 'assistant', 'content': "무엇을 도와드릴까요?"})
-            st.chat_message('assistant').write("무엇을 도와드릴까요?")
+            msg = "무엇을 도와드릴까요?"
+            st.session_state['messages'].append({'role': 'assistant', 'content': msg})
+            st.chat_message('assistant').write(msg)
     else:
         # 일반적인 처리
         response = client.chat.completions.create(
