@@ -82,7 +82,7 @@ context = [
 st.title('🛍️ Trendy Fashion 🛍️')    # 웹 애플리케이션의 제목을 설정한다.
 st.caption('🤖 AI 쇼핑 어시스턴트입니다.')       # 설명 문구(부제목)를 추가한다.
 
-# 챗봇이 이미 인사를 했는지 여부를 추적
+# 챗봇이 이미 인사를 했는지 여부를 추적한다.
 if 'greeted' not in st.session_state:
     st.session_state['greeted'] = False
 
@@ -95,13 +95,13 @@ if not st.session_state['greeted']:
 if 'messages' not in st.session_state:  
     st.session_state['messages'] = []
 
-# 대화 기록을 화면에 출력
+# 대화 기록을 화면에 출력한다.
 for msg in st.session_state.messages:
     st.chat_message(msg['role']).write(msg['content'])
 
 # 사용자 인사말 확인 함수
 def is_greeting(message):
-    greetings = ["hello", "hi", "안녕하세요", "안녕", "안뇽", "하이"]
+    greetings = ['hello', 'hi', 'good morning', 'good afternoon', 'hey', '안녕하세요', '안녕', '안뇽', '하이']
     return any(greeting in message.lower() for greeting in greetings)
 
 # 사용자 입력 처리 및 GPT 응답 생성
@@ -110,7 +110,7 @@ if prompt := st.chat_input():
     st.session_state['messages'].append({'role': 'user', 'content': prompt})
     st.chat_message('user').write(prompt)
 
-    # 사용자 입력이 인사말인지 확인
+    # 사용자 입력이 인사말인지 확인한다.
     if is_greeting(prompt):
         if not st.session_state['greeted']:
             response = client.chat.completions.create(
